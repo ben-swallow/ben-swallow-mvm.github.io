@@ -1,0 +1,220 @@
+---
+  title: "Multivariate Methods 2019/20"
+---
+
+
+```{r coin, echo=FALSE}
+
+
+library(plot3D)
+library(dplyr)
+library(DT)
+library(randomForest)
+
+pca.all <- prcomp(iris[c(1, 2, 3, 4)], center = TRUE, scale. = TRUE)
+pca_rot = data.frame(pca.all$rotation)
+df = data.frame(iris$Species,pca.all$x[,1:2])
+names(df) <- c("Species", "PC1", "PC2")
+rfFit <- randomForest(Species ~ ., data = df)
+
+server <- shinyServer(function(input, output) {
+        activeInput <- reactive({
+                tmpData <-
+                        data.frame(
+                                input$Sepal.Length,
+                                input$Sepal.Width,
+                                input$Petal.Length,
+                                input$Petal.Width
+                        )
+                names(tmpData) <- names(iris[, 1:4])
+                tmpData
+        })
+        activeInput2 <- reactive({
+          input$k
+        })
+        output$mytable = DT::renderDataTable({
+                data <- iris
+                data[sample(1:nrow(data),nrow(data)),]
+        })
+        output$pcaPlot <- renderPlot({
+                inputDF <- activeInput()
+                p1 <- predict(pca.all, inputDF)
+                iris3 <- data.frame(as.factor(iris[,5]))
+                iris3 <- iris3 %>% mutate_if(is.factor, as.numeric)
+                iris3[iris3==2]<-0
+                g <-
+                  autoplot(prcomp(iris[c(1, 2, 3, 4)]), data = iris, colour = 'Species',frame = TRUE,frame.type = 't',frame.colour = 'Species',scale = 0,loadings = TRUE,loadings.colour = 'blue',loadings.label = TRUE,loadings.label.size = 5, shape = iris3[,1]) +
+                        geom_point(
+                                x = p1[1],
+                                y = p1[2],
+                                color = 'black',
+                                size = 5,
+                                pch = 2
+                        )
+                g
+        })
+        output$pred <- renderText({
+                inputDF <- activeInput()
+                p1 <- predict(pca.all, inputDF)
+                pca.test <- data.frame(p1[, 1], p1[, 2])
+                names(pca.test) <- c("PC1", "PC2")
+                paste("These observations would suggest your Flower Type is",
+                      predict(rfFit, pca.test))
+        })
+        output$boxPlot <- renderPlot({
+          pcsel <- input$pcplot
+          scatter3D(pca_rot$PC1, pca_rot$PC2, pca_rot$PC3, bty = "g", phi=0, xlab = "PC1", ylab ="PC2", zlab = "PC3", pch = 20, cex = 2, ticktype = "detailed", colvar=pca_rot[,pcsel], col = ramp.col(c("gold", "black", "blue")),clim=c(-0.9,0.8))
+          text3D(pca_rot$PC1, pca_rot$PC2, pca_rot$PC3,  labels = rownames(pca_rot), add = TRUE, colkey = FALSE, cex = 1)
+        })
+        
+        
+        output$KNN <- renderPlot({
+                inputDF <- activeInput2()
+                set.seed(260491)
+                n <- nrow(iris)
+                ind1 <- sample(c(1:n), 40)
+                ind2 <- sample(c(1:n)[-ind1],30)
+                ind3 <- sample(c(1:n)[-c(ind1, ind2)], 80)
+                
+                train.data <- iris[ind1,1:4]
+                train.lab <- iris$Species[ind1]
+                valid.data <- iris[ind2,1:4]
+                valid.lab <- iris$Species[ind2]
+                test.data <- iris[ind3,1:4]
+                test.lab <- iris$Species[ind3]
+                
+                
+                # ind4 <- sample(c(1:n)[-c(ind1, ind2, ind3)], round(n / 5))
+                # ind5 <- setdiff(c(1:n), c(ind1, ind2, ind3, ind4))
+                ind <- list(ind1, ind2, ind3)
+                
+                library(class)
+                
+                pred <- knn(train.data, valid.data, train.lab, k=inputDF)
+                        
+                corr.class.rate <- sum(pred == valid.lab) / nrow(valid.data)
+                        
+                
+                plot(pred,main=paste("Missclassifcation rate =",1-corr.class.rate))
+        })
+        
+        
+        output$KNN2 <- renderPlot({
+                corr.class.rate <- rep(NA, 20)
+                set.seed(260491)
+                n <- nrow(iris)
+                ind1 <- sample(c(1:n), 40)
+                ind2 <- sample(c(1:n)[-ind1],30)
+                ind3 <- sample(c(1:n)[-c(ind1, ind2)], 80)
+                
+                train.data <- iris[ind1,1:4]
+                train.lab <- iris$Species[ind1]
+                valid.data <- iris[ind2,1:4]
+                valid.lab <- iris$Species[ind2]
+                test.data <- iris[ind3,1:4]
+                test.lab <- iris$Species[ind3]
+                for(k in 1:20){
+                        
+                        pred <- knn(train.data, valid.data, train.lab, k=k)
+                
+                        corr.class.rate[k] <- sum(pred == valid.lab) / nrow(valid.data)
+                
+                }
+        
+                ## Plot the line plot of the k versus classification rates.
+                plot(1:20, corr.class.rate, type="l", xlab="k")
+                max(corr.class.rate)
+                ## Find which k gives the maximum correct classification rate.
+                best.k <- which.max(corr.class.rate)
+                ## Find the test error for the best k found.
+                pred <- knn(train.data, test.data, train.lab, k=best.k)
+                sum(pred == test.lab) / nrow(test.data)
+                
+        })
+        
+        
+})
+
+
+ui <- shinyUI(fluidPage(# Application title
+          tabsetPanel(
+            tabPanel("Iris Dataset",DT::dataTableOutput("mytable")),
+            tabPanel("PCA",
+              sidebarLayout(
+                sidebarPanel(
+                        h4("Manually adjust the slidebars to show predictions"),
+                        sliderInput(
+                                "Sepal.Length",
+                                "Sepal.Length",
+                                min = min(iris$Sepal.Length),
+                                max = max(iris$Sepal.Length),
+                                value = iris$Sepal.Length[1],
+                                step = 0.01
+                        ),
+                        sliderInput(
+                          "Sepal.Width",
+                          "Sepal.Width",
+                          min = min(iris$Sepal.Width),
+                          max = max(iris$Sepal.Width),
+                          value = iris$Sepal.Width[1],
+                          step = 0.01
+                        ),
+                        sliderInput(
+                          "Petal.Length",
+                          "Petal.Length",
+                          min = min(iris$Petal.Length),
+                          max = max(iris$Petal.Length),
+                          value = iris$Petal.Length[1],
+                          step = 0.01
+                        ),
+                        sliderInput(
+                          "Petal.Width",
+                          "Petal.Width",
+                          min = min(iris$Petal.Width),
+                          max = max(iris$Petal.Width),
+                          value = iris$Petal.Width[1],
+                          step = 0.01
+                        ),
+                        radioButtons("pcplot", "Choose PC for key", c("PC1","PC2","PC3"))
+                ),
+                
+                # Show a plot and prediction
+                mainPanel(tabsetPanel(
+                        tabPanel(
+                                "Plot PCA",
+                                titlePanel("Principal Components Analysis of the Iris Dataset"),
+                                h6("Includes code from https://github.com/eakalak-suthampan/dev_data_product amd https://reneshbedre.github.io/blog/pca_3d.html"),
+                                plotOutput("pcaPlot"),
+                                h1(textOutput("pred")),
+                                plotOutput("boxPlot")
+                        )
+                                ))
+                )),
+            tabPanel("KNN",
+                     titlePanel("k-Nearest Neighbours Analysis of the Iris Dataset"),
+                     sidebarLayout(
+                       sidebarPanel(
+                         h4("Manually adjust the slidebars to show predictions"),
+                         sliderInput(
+                           "k",
+                           "k",
+                           min = 1,
+                           max = 20,
+                           value = 1,
+                           step = 1
+                         )
+                       )
+                       ,
+                     mainPanel(plotOutput("KNN"),
+                               h4("Missclassification by k"),
+                               plotOutput("KNN2")))),
+            tabPanel("Clustering")
+            )))
+
+
+
+shinyApp(ui=ui,server=server, options = list(height = 700))
+
+
+
+```

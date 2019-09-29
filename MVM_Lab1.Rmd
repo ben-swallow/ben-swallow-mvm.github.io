@@ -1,0 +1,275 @@
+---
+title: "Multivariate methods lab 1"
+runtime: shiny
+output:
+    html_document:
+      toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(shiny)
+```
+
+
+`Developed by Ben Swallow, 2019, edited from Alexey Lindo`
+
+## Introduction
+
+R is an open source programming language and software environment for statistical computing and graphics.
+The R language is widely used among statisticians for developing statistical software and data analysis.
+It is freely available for any popular platform (Windows, Mac, Linux, etc.) from the [https://cran.r-project.org/mirrors.html](CRAN page), on the R [https://www.r-project.org/](web-site).
+
+If you are searching for resources that will help you to get started with R, then you can start looking [https://cran.r-project.org/manuals.html](here). A lot of valuable information about books, websites, videos about R is gathered [http://www.computerworld.com/article/2497464/business-intelligence/business-intelligence-60-r-resources-to-improve-your-data-skills.html](here). You can also try one of the online R programming courses, for example [http://tryr.codeschool.com/levels/1/challenges/1](this) one.
+
+
+### Linear regression
+
+
+The command for fitting a linear regression model in R is <tt>lm</tt>. When fitting a model with the equation form:
+
+$$ Y = \beta_0 + \sum_{j=1}^px_j\beta_j + \epsilon$$
+or
+
+$$ Y = X\overline{\beta} + \epsilon$$
+
+if the variables are in separate vectors called $y, x_1, \ldots, x_p$ then we use  
+
+```{r,eval=FALSE} 
+res.lm <- lm(y ~ x1 + ... + xp)
+```
+
+or if we have the explanatory variables as columns in a matrix called X then we use 
+
+```{r,eval=FALSE} 
+res.lm <- lm(y ~ X) 
+```
+
+If we have all the variables in a data frame called <tt>dataset</tt> and we're using all variables as explanatory variables (except <tt>y</tt>) we use 
+  
+```{r,eval=FALSE} 
+res.lm <- lm(y ~ ., data=dataset)
+```
+  
+(Note: this last form, using the <tt>data</tt> argument,  is usually best for use with the <tt>predict</tt> command.)   
+The <tt>.</tt> indicates all other variables except <tt>y</tt> (which must be the name of the variable in the data frame).
+Alternatively if we are only using a couple of variables in the data frame (e.g. $x_2, x_5, x_7$ we can use the following: 
+  
+```{r,eval=FALSE} 
+res.lm <- lm(y ~ x2 + x5 + x7, data=dataset)
+```
+  
+
+The fitted object produced by <tt>lm</tt> is a list (so each element can be extracted using the fitted objects name, <tt>res.lm</tt> in our examples, followed by a dollar sign, <tt>\$</tt>, and then the name of the element required).
+The most important elements in the list produced are: <tt>coefficients</tt>,	 a named vector of coefficients; <tt>residuals</tt>, the residuals, that is response minus fitted values; <tt>fitted.values</tt>, the fitted mean values.
+
+To get the fitted values $\hat{y}$ produced by the fitted equation ($\hat{\beta}_0 + \sum_{j=1}^px_j\hat{\beta}_j$) in our example we would type:
+  
+```{r,eval=FALSE} 
+res.lm$fit
+```
+  
+
+In order to predict the fitted values for new data, we use the command <tt>predict</tt>. To use this, we need to produce a data frame with the same explanatory variables (called the same names) as the data used to fit the model. For example:
+  
+```{r,eval=FALSE} 
+xnew<-data.frame(x2=x2new, x5=x5new, x7=x7new)   
+new.fit <- predict(res.lm, xnew)
+```
+  
+Alternatively we could add a column of 1's to our explanatory variables matrix and matrix post-multiply the resulting matrix by the vector of fitted coefficients.
+  
+```{r,eval=FALSE} 
+xnew<-cbind(rep(1,length(x2new)), x2new, x5new, 7new)   
+new.fit <- xnew%*%res.lm$coef
+```
+  
+
+When using the regression model for classification, it is important to first make sure that the outcome variable $y$ is made up of 0's and 1's. The predicted values (either fitted values for the data the model is fit on or the predicted values produced by applying the model to new data) must be transformed to the same form using the following rule:
+\begin{itemize}
+  \item If the model-fitted value is `$\le$' to 0.5 then the predicted class is 0;  
+  \item If the model-fitted value is `$>$' than 0.5 then the predicted class is 1;
+\end{itemize}
+which can be done using something like the following code:
+  
+```{r,eval=FALSE} 
+pred.class<-ifelse(new.fit<=0.5, 0, 1)
+```
+  
+### K-Nearest Neighbours
+The k-nearest neighbours command is <tt>knn</tt> from the library <tt>class</tt>. It has 4 main arguments to be entered (in order): <tt>train</tt>, matrix or data frame of training set cases; <tt>test</tt>,	 matrix or data frame of test set cases, a vector will be interpreted as a row vector for a single case, (must have the same variables as in train); <tt>cl</tt>, factor of true classifications of/labels from the training set; <tt>k</tt>, number of neighbours considered.
+  
+```{r,eval=FALSE} 
+pred.class <- knn(x, test, y, 3)
+```
+  
+If we wanted to predict on the same data as the model is fit on we would use:
+  
+```{r,eval=FALSE} 
+pred.class <- knn(x, x, y, 3)
+```
+  
+
+
+### Sub-setting data and evaluating model performance
+We need to compare the predicted class labels to the true labels in order to evaluate how well the model will do on future data. In order to fairly evaluate, we need to either use cross validation or split data up into training, validation and test data sets.
+We do so using something like the following. 
+
+```{r,eval=FALSE} 
+# If we want the split to be 50%, 25% and 25% (say) we first have to get the indices   
+# Suppose we have a dataset, data,  with the first variable containing the labels  
+# and the remaining variables being the  measurement variables:  
+n <- nrow(data)  
+ind1 <- sample(c(1:n),round(n/2))  
+ind2 <- sample(c(1:n)[-ind1],round(n/4))  
+ind3 <- setdiff(c(1:n),c(ind1,ind2))  
+# These numbers in ind1, ind2 and ind3 indicate which observations are to be assigned  
+# to each subset  
+# We now use these to create the training, validation and test datasets  
+train.data <- data[ind1, ]  
+valid.data <- data[ind2, ]  
+test.data <- data[ind3, ] 
+```
+
+For k-nearest neighbours we can use leave-one-out cross-validation by using the command <tt>knn.cv</tt> which only requires three main arguments: <tt>train</tt>, matrix or data frame of training set cases; <tt>cl</tt>, factor of true classifications of/labels from the training set; <tt>k</tt>, number of neighbours considered.
+
+We can then check to see which predictions we got right:
+  
+```{r,eval=FALSE} 
+pred.class==test.label
+```
+  
+The result will be a vector the same length as the pred.class and test.label vectors, with TRUE in the entries where the two corresponding entries had the same class and FALSE where they were different.
+
+Alternatively, we can check which predictions we got wrong (either by checking which of the above list gave FALSE as an answer or checking which of the list produced by the following code gave TRUE as an answer).
+  
+```{r,eval=FALSE} 
+pred.class!=test.label
+```
+  
+We can count the number we got correct by using the command <tt>sum</tt> (which will count the number of TRUE's).
+  
+```{r,eval=FALSE} 
+sum(pred.class==test.label)
+```
+  
+We can get the proportion correct by using something similar to the following
+  
+```{r,eval=FALSE} 
+sum(pred.class==test.label)/length(test.label)
+```
+  
+
+We can produce the cross classification table by doing the following:
+  
+```{r,eval=FALSE} 
+table(test.label, pred.class)
+```
+  
+where the rows are the true labels (as the first argument/entry in <tt>table</tt> is <tt>test.data[,1]</tt>) and the columns are the predicted classes (as the second entry is <tt>pred.class</tt>). 
+
+
+## Classification Examples for K-nearest Neighbours and Linear Regression
+
+Remember if you are randomly sampling subsets of data, unless we all set the same random number seed before we start, your results will be slightly different each time. They will also be slightly different from your fellow students' results and also from the results I get. Hopefully, the interpretation of the results will be similar though.
+
+### Question 1)
+
+We are going to be looking at a dataset that concerns diabetes patients and various medical tests included in the <tt>PimaIndiansDiabetes</tt> dataset.
+
+Start by installing the <tt>mlbench</tt> package if it is not already installed and then load it so you can access the dataset.
+
+
+```{r} 
+if(!require(mlbench)){install.packages("mlbench",repos = "http://cran.us.r-project.org")}
+library(mlbench) # Load the R package
+data(PimaIndiansDiabetes) #Load the dataset into the workspace
+head(PimaIndiansDiabetes) #Print the first rows of the dataset
+?PimaIndiansDiabetes #Access the help file for these data
+```  
+
+The help file gives us some information on the variables of interest. There are 8 variables in the data set plus our classification label and these are described as follows.   
+
+Column 1 : No of children  
+Column 2 : Glucose test result  
+Column 3 : Blood pressure  
+Column 4 : Skin fold thickness at triceps  
+Column 5 : Insulin test result  
+Column 6 : Body mass index (BMI)    
+Column 7 : Diabetes pedigree function   
+Column 8 : Age of patient  
+Column 9 : Class that we want to predict  
+
+
+
+
+#### Steps
+
+* Let's use this new scaled data to fit a regression model to predict the classification of patients in the test dataset. First of all use the code above to create a training and testing dataset.
+
+* Firstly we notice that each of these variables are measured in different units. We have dicussed in lectures why this is important. Develop a scaling rule based on the training dataset. Why is it important to do this on the training dataset? Don't forget to keep a record of the scaling algorithm (i.e. the exact values you have used) for application to the test dataset.
+
+* Referring back to the code above, fit a logistic regression on the training dataset.
+
+* Use this to predict the labels of the test dataset and calculate the varying types of accuracy measures. Using the derived correct classification rates, say whether or not the regression classification does a good job. Which class does the rule do a better job of predicting?
+
+#### k-nearest neighbours
+* Now use k-nearest neighbours to create classification rules for $k = 1, 3, 5, 7$ and $9$. 
+
+* Using the test data performance, select which value of $k$ gives the best result and record the cross classification table for this classification rule. Comparing this to the regression model above, does $k$-nearest neighbours do a better job classifying diabetes than linear regression?
+
+
+
+
+### Question 2)
+After a severe storm a number of sparrows were taken to a biological laboratory. Scientists recorded various measurements for each of the 49 female sparrows.
+
+Download the data file to your directory from Moodle. Load it into your workspace either with the code below (you may need to change the path to where the dataset is located). Alternatively, you can use the 'Import Dataset' button in the top-right of Rstudio.
+
+```{r load myData}
+sparrows <- read.table("sparrows.dat", header=TRUE)
+```
+
+Next print the first few rows of the dataset to get an idea of what the data look like.
+
+```{r}
+head(sparrows)
+```
+
+Column 1 (totL): Total Length  
+Column 2 (AlarE): Alar Extent  
+Column 3 (bhL): Length of Beak and Head  
+Column 4 (hL): Length of Humerus  
+Column 5 (kL): Length of keel of Sternum  
+
+
+
+Subsequently to the measurements being taken on the sparrows, about half the sparrows died (sparrows in rows 1-21 survived; sparrows in rows 22-49 died) and the scientists were interested in the possibility that the sparrows, which died tended to have more extreme measurements on some or all of the variables.
+
+We look to create classification rules based on these variables using linear regression and $k$-nearest neighbours. If these perform well it might suggest that there are differences in the variables across the two groups.
+
+* Create an outcome variable y based on the description above
+
+* Split the data into training and validation datasets (there is too little data to split into three datasets). 
+
+* Scale the data appropriately.
+
+* Fit a regression model and knn and record the classification results.
+
+* Which method is best for these data?
+
+
+### Question 3) - advanced question
+* Look again at the *regression* models fitted above. So far we've only looked at models that use all the variables, despite the fact that some may not be important. Try looking at the <<t>>step</tt> function in R by typing
+
+```{r}
+?step
+```
+
+This function conducts stepwise variable selection on a fitted linear model.
+
+* Apply stepwise selection to your fitted models in Questions 1 and 2 
+
+* Create a regression model with this new set of variables (assuming the stepwise procedure removes some of them). 
+
+* Predict the labels of the training data with a (possibly) reduced model and compare your classification results to previous ones. Does anything change?

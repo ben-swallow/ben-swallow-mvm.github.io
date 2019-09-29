@@ -1,0 +1,20 @@
+name: "my-website"
+output_dir: "."
+navbar:
+  title: "Multivariate Methods 2019/20"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Lab 1"
+      href: MVM_Lab1.html
+  right:
+    - icon: ion-social-twitter
+      href: https://www.twitter.com/benswallow88
+    - icon: fa-github
+      href: https://github.com/ben-swallow/
+    - icon: ion-social-linkedin-outline
+      href: https://www.linkedin.com/in/benswallow
+output:
+  html_document:
+    include:
+      before_body: header.html

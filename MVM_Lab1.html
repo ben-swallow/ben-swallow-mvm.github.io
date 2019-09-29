@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Multivariate methods lab 1</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+<link href="site_libs/ionicons-2.0.1/css/ionicons.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Multivariate Methods 2019/20</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="MVM_Lab1.html">Lab 1</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://www.twitter.com/benswallow88">
+    <span class="ion ion-social-twitter"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="https://github.com/ben-swallow/">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="https://www.linkedin.com/in/benswallow">
+    <span class="ion ion-social-linkedin-outline"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<a href="https://www.gla.ac.uk/"><img src="figures/GLA.jpg" style="width:150px; height:86px" class="center"></a>
+
+<div class="fluid-row" id="section-header">
+
+
+
+<h1 class="title toc-ignore">Multivariate methods lab 1</h1>
+
+</div>
+
+<div id="section-TOC">
+<ul>
+<li><a href="#section-introduction">Introduction</a><ul>
+<li><a href="#section-linear-regression">Linear regression</a></li>
+<li><a href="#section-k-nearest-neighbours">K-Nearest Neighbours</a></li>
+<li><a href="#section-sub-setting-data-and-evaluating-model-performance">Sub-setting data and evaluating model performance</a></li>
+</ul></li>
+<li><a href="#section-classification-examples-for-k-nearest-neighbours-and-linear-regression">Classification Examples for K-nearest Neighbours and Linear Regression</a><ul>
+<li><a href="#section-question-1">Question 1)</a></li>
+<li><a href="#section-question-2">Question 2)</a></li>
+<li><a href="#section-question-3---advanced-question">Question 3) - advanced question</a></li>
+</ul></li>
+</ul>
+</div>
+
+<p><code>Developed by Ben Swallow, 2019, edited from Alexey Lindo</code></p>
+<div id="section-introduction" class="section level2">
+<h2>Introduction</h2>
+<p>R is an open source programming language and software environment for statistical computing and graphics. The R language is widely used among statisticians for developing statistical software and data analysis. It is freely available for any popular platform (Windows, Mac, Linux, etc.) from the <a href="CRAN%20page">https://cran.r-project.org/mirrors.html</a>, on the R <a href="web-site">https://www.r-project.org/</a>.</p>
+<p>If you are searching for resources that will help you to get started with R, then you can start looking <a href="here">https://cran.r-project.org/manuals.html</a>. A lot of valuable information about books, websites, videos about R is gathered <a href="here">http://www.computerworld.com/article/2497464/business-intelligence/business-intelligence-60-r-resources-to-improve-your-data-skills.html</a>. You can also try one of the online R programming courses, for example <a href="this">http://tryr.codeschool.com/levels/1/challenges/1</a> one.</p>
+<div id="section-linear-regression" class="section level3">
+<h3>Linear regression</h3>
+<p>The command for fitting a linear regression model in R is <tt>lm</tt>. When fitting a model with the equation form:</p>
+<p><span class="math display">\[ Y = \beta_0 + \sum_{j=1}^px_j\beta_j + \epsilon\]</span> or</p>
+<p><span class="math display">\[ Y = X\overline{\beta} + \epsilon\]</span></p>
+<p>if the variables are in separate vectors called <span class="math inline">\(y, x_1, \ldots, x_p\)</span> then we use</p>
+<pre class="r"><code>res.lm &lt;- lm(y ~ x1 + ... + xp)</code></pre>
+<p>or if we have the explanatory variables as columns in a matrix called X then we use</p>
+<pre class="r"><code>res.lm &lt;- lm(y ~ X) </code></pre>
+<p>If we have all the variables in a data frame called <tt>dataset</tt> and we’re using all variables as explanatory variables (except <tt>y</tt>) we use</p>
+<pre class="r"><code>res.lm &lt;- lm(y ~ ., data=dataset)</code></pre>
+<p>(Note: this last form, using the <tt>data</tt> argument, is usually best for use with the <tt>predict</tt> command.)<br />
+The <tt>.</tt> indicates all other variables except <tt>y</tt> (which must be the name of the variable in the data frame). Alternatively if we are only using a couple of variables in the data frame (e.g. <span class="math inline">\(x_2, x_5, x_7\)</span> we can use the following:</p>
+<pre class="r"><code>res.lm &lt;- lm(y ~ x2 + x5 + x7, data=dataset)</code></pre>
+<p>The fitted object produced by <tt>lm</tt> is a list (so each element can be extracted using the fitted objects name, <tt>res.lm</tt> in our examples, followed by a dollar sign, <tt>$</tt>, and then the name of the element required). The most important elements in the list produced are: <tt>coefficients</tt>, a named vector of coefficients; <tt>residuals</tt>, the residuals, that is response minus fitted values; <tt>fitted.values</tt>, the fitted mean values.</p>
+<p>To get the fitted values <span class="math inline">\(\hat{y}\)</span> produced by the fitted equation (<span class="math inline">\(\hat{\beta}_0 + \sum_{j=1}^px_j\hat{\beta}_j\)</span>) in our example we would type:</p>
+<pre class="r"><code>res.lm$fit</code></pre>
+<p>In order to predict the fitted values for new data, we use the command <tt>predict</tt>. To use this, we need to produce a data frame with the same explanatory variables (called the same names) as the data used to fit the model. For example:</p>
+<pre class="r"><code>xnew&lt;-data.frame(x2=x2new, x5=x5new, x7=x7new)   
+new.fit &lt;- predict(res.lm, xnew)</code></pre>
+<p>Alternatively we could add a column of 1’s to our explanatory variables matrix and matrix post-multiply the resulting matrix by the vector of fitted coefficients.</p>
+<pre class="r"><code>xnew&lt;-cbind(rep(1,length(x2new)), x2new, x5new, 7new)   
+new.fit &lt;- xnew%*%res.lm$coef</code></pre>
+When using the regression model for classification, it is important to first make sure that the outcome variable <span class="math inline">\(y\)</span> is made up of 0’s and 1’s. The predicted values (either fitted values for the data the model is fit on or the predicted values produced by applying the model to new data) must be transformed to the same form using the following rule:
+
+<p>which can be done using something like the following code:</p>
+<pre class="r"><code>pred.class&lt;-ifelse(new.fit&lt;=0.5, 0, 1)</code></pre>
+</div>
+<div id="section-k-nearest-neighbours" class="section level3">
+<h3>K-Nearest Neighbours</h3>
+<p>The k-nearest neighbours command is <tt>knn</tt> from the library <tt>class</tt>. It has 4 main arguments to be entered (in order): <tt>train</tt>, matrix or data frame of training set cases; <tt>test</tt>, matrix or data frame of test set cases, a vector will be interpreted as a row vector for a single case, (must have the same variables as in train); <tt>cl</tt>, factor of true classifications of/labels from the training set; <tt>k</tt>, number of neighbours considered.</p>
+<pre class="r"><code>pred.class &lt;- knn(x, test, y, 3)</code></pre>
+<p>If we wanted to predict on the same data as the model is fit on we would use:</p>
+<pre class="r"><code>pred.class &lt;- knn(x, x, y, 3)</code></pre>
+</div>
+<div id="section-sub-setting-data-and-evaluating-model-performance" class="section level3">
+<h3>Sub-setting data and evaluating model performance</h3>
+<p>We need to compare the predicted class labels to the true labels in order to evaluate how well the model will do on future data. In order to fairly evaluate, we need to either use cross validation or split data up into training, validation and test data sets. We do so using something like the following.</p>
+<pre class="r"><code># If we want the split to be 50%, 25% and 25% (say) we first have to get the indices   
+# Suppose we have a dataset, data,  with the first variable containing the labels  
+# and the remaining variables being the  measurement variables:  
+n &lt;- nrow(data)  
+ind1 &lt;- sample(c(1:n),round(n/2))  
+ind2 &lt;- sample(c(1:n)[-ind1],round(n/4))  
+ind3 &lt;- setdiff(c(1:n),c(ind1,ind2))  
+# These numbers in ind1, ind2 and ind3 indicate which observations are to be assigned  
+# to each subset  
+# We now use these to create the training, validation and test datasets  
+train.data &lt;- data[ind1, ]  
+valid.data &lt;- data[ind2, ]  
+test.data &lt;- data[ind3, ] </code></pre>
+<p>For k-nearest neighbours we can use leave-one-out cross-validation by using the command <tt>knn.cv</tt> which only requires three main arguments: <tt>train</tt>, matrix or data frame of training set cases; <tt>cl</tt>, factor of true classifications of/labels from the training set; <tt>k</tt>, number of neighbours considered.</p>
+<p>We can then check to see which predictions we got right:</p>
+<pre class="r"><code>pred.class==test.label</code></pre>
+<p>The result will be a vector the same length as the pred.class and test.label vectors, with TRUE in the entries where the two corresponding entries had the same class and FALSE where they were different.</p>
+<p>Alternatively, we can check which predictions we got wrong (either by checking which of the above list gave FALSE as an answer or checking which of the list produced by the following code gave TRUE as an answer).</p>
+<pre class="r"><code>pred.class!=test.label</code></pre>
+<p>We can count the number we got correct by using the command <tt>sum</tt> (which will count the number of TRUE’s).</p>
+<pre class="r"><code>sum(pred.class==test.label)</code></pre>
+<p>We can get the proportion correct by using something similar to the following</p>
+<pre class="r"><code>sum(pred.class==test.label)/length(test.label)</code></pre>
+<p>We can produce the cross classification table by doing the following:</p>
+<pre class="r"><code>table(test.label, pred.class)</code></pre>
+<p>where the rows are the true labels (as the first argument/entry in <tt>table</tt> is <tt>test.data[,1]</tt>) and the columns are the predicted classes (as the second entry is <tt>pred.class</tt>).</p>
+</div>
+</div>
+<div id="section-classification-examples-for-k-nearest-neighbours-and-linear-regression" class="section level2">
+<h2>Classification Examples for K-nearest Neighbours and Linear Regression</h2>
+<p>Remember if you are randomly sampling subsets of data, unless we all set the same random number seed before we start, your results will be slightly different each time. They will also be slightly different from your fellow students’ results and also from the results I get. Hopefully, the interpretation of the results will be similar though.</p>
+<div id="section-question-1" class="section level3">
+<h3>Question 1)</h3>
+<p>We are going to be looking at a dataset that concerns diabetes patients and various medical tests included in the <tt>PimaIndiansDiabetes</tt> dataset.</p>
+<p>Start by installing the <tt>mlbench</tt> package if it is not already installed and then load it so you can access the dataset.</p>
+<pre class="r"><code>if(!require(mlbench)){install.packages(&quot;mlbench&quot;,repos = &quot;http://cran.us.r-project.org&quot;)}
+library(mlbench) # Load the R package
+data(PimaIndiansDiabetes) #Load the dataset into the workspace
+head(PimaIndiansDiabetes) #Print the first rows of the dataset</code></pre>
+<pre><code>##   pregnant glucose pressure triceps insulin mass pedigree age diabetes
+## 1        6     148       72      35       0 33.6    0.627  50      pos
+## 2        1      85       66      29       0 26.6    0.351  31      neg
+## 3        8     183       64       0       0 23.3    0.672  32      pos
+## 4        1      89       66      23      94 28.1    0.167  21      neg
+## 5        0     137       40      35     168 43.1    2.288  33      pos
+## 6        5     116       74       0       0 25.6    0.201  30      neg</code></pre>
+<pre class="r"><code>?PimaIndiansDiabetes #Access the help file for these data</code></pre>
+<p>The help file gives us some information on the variables of interest. There are 8 variables in the data set plus our classification label and these are described as follows.</p>
+<p>Column 1 : No of children<br />
+Column 2 : Glucose test result<br />
+Column 3 : Blood pressure<br />
+Column 4 : Skin fold thickness at triceps<br />
+Column 5 : Insulin test result<br />
+Column 6 : Body mass index (BMI)<br />
+Column 7 : Diabetes pedigree function<br />
+Column 8 : Age of patient<br />
+Column 9 : Class that we want to predict</p>
+<div id="section-steps" class="section level4">
+<h4>Steps</h4>
+<ul>
+<li><p>Let’s use this new scaled data to fit a regression model to predict the classification of patients in the test dataset. First of all use the code above to create a training and testing dataset.</p></li>
+<li><p>Firstly we notice that each of these variables are measured in different units. We have dicussed in lectures why this is important. Develop a scaling rule based on the training dataset. Why is it important to do this on the training dataset? Don’t forget to keep a record of the scaling algorithm (i.e. the exact values you have used) for application to the test dataset.</p></li>
+<li><p>Referring back to the code above, fit a logistic regression on the training dataset.</p></li>
+<li><p>Use this to predict the labels of the test dataset and calculate the varying types of accuracy measures. Using the derived correct classification rates, say whether or not the regression classification does a good job. Which class does the rule do a better job of predicting?</p></li>
+</ul>
+</div>
+<div id="section-k-nearest-neighbours-1" class="section level4">
+<h4>k-nearest neighbours</h4>
+<ul>
+<li><p>Now use k-nearest neighbours to create classification rules for <span class="math inline">\(k = 1, 3, 5, 7\)</span> and <span class="math inline">\(9\)</span>.</p></li>
+<li><p>Using the test data performance, select which value of <span class="math inline">\(k\)</span> gives the best result and record the cross classification table for this classification rule. Comparing this to the regression model above, does <span class="math inline">\(k\)</span>-nearest neighbours do a better job classifying diabetes than linear regression?</p></li>
+</ul>
+</div>
+</div>
+<div id="section-question-2" class="section level3">
+<h3>Question 2)</h3>
+<p>After a severe storm a number of sparrows were taken to a biological laboratory. Scientists recorded various measurements for each of the 49 female sparrows.</p>
+<p>Download the data file to your directory from Moodle. Load it into your workspace either with the code below (you may need to change the path to where the dataset is located). Alternatively, you can use the ‘Import Dataset’ button in the top-right of Rstudio.</p>
+<pre class="r"><code>sparrows &lt;- read.table(&quot;sparrows.dat&quot;, header=TRUE)</code></pre>
+<p>Next print the first few rows of the dataset to get an idea of what the data look like.</p>
+<pre class="r"><code>head(sparrows)</code></pre>
+<pre><code>##   totL AlarE  bhL   hL   kL
+## 1  156   245 31.6 18.5 20.5
+## 2  154   240 30.4 17.9 19.6
+## 3  153   240 31.0 18.4 20.6
+## 4  153   236 30.9 17.7 20.2
+## 5  155   243 31.5 18.6 20.3
+## 6  163   247 32.0 19.0 20.9</code></pre>
+<p>Column 1 (totL): Total Length<br />
+Column 2 (AlarE): Alar Extent<br />
+Column 3 (bhL): Length of Beak and Head<br />
+Column 4 (hL): Length of Humerus<br />
+Column 5 (kL): Length of keel of Sternum</p>
+<p>Subsequently to the measurements being taken on the sparrows, about half the sparrows died (sparrows in rows 1-21 survived; sparrows in rows 22-49 died) and the scientists were interested in the possibility that the sparrows, which died tended to have more extreme measurements on some or all of the variables.</p>
+<p>We look to create classification rules based on these variables using linear regression and <span class="math inline">\(k\)</span>-nearest neighbours. If these perform well it might suggest that there are differences in the variables across the two groups.</p>
+<ul>
+<li><p>Create an outcome variable y based on the description above</p></li>
+<li><p>Split the data into training and validation datasets (there is too little data to split into three datasets).</p></li>
+<li><p>Scale the data appropriately.</p></li>
+<li><p>Fit a regression model and knn and record the classification results.</p></li>
+<li><p>Which method is best for these data?</p></li>
+</ul>
+</div>
+<div id="section-question-3---advanced-question" class="section level3">
+<h3>Question 3) - advanced question</h3>
+<ul>
+<li>Look again at the <em>regression</em> models fitted above. So far we’ve only looked at models that use all the variables, despite the fact that some may not be important. Try looking at the &lt;<t>&gt;step</tt> function in R by typing</li>
+</ul>
+<pre class="r"><code>?step</code></pre>
+<p>This function conducts stepwise variable selection on a fitted linear model.</p>
+<ul>
+<li><p>Apply stepwise selection to your fitted models in Questions 1 and 2</p></li>
+<li><p>Create a regression model with this new set of variables (assuming the stepwise procedure removes some of them).</p></li>
+<li><p>Predict the labels of the training data with a (possibly) reduced model and compare your classification results to previous ones. Does anything change?</p></li>
+</ul>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("section-TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
